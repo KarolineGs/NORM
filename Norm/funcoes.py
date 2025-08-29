@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from unidecode import unidecode
 import numpy as np
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import unicodedata
@@ -137,23 +136,6 @@ def carregar_arquivo(
     except Exception as e:
         raise RuntimeError(f"Erro ao carregar '{escolhido}': {e}")
 
-
-
-
-
-
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import scipy.stats as st
-import scipy.optimize
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import scipy.stats as st
-import scipy.optimize
 
 # ==========================================================
 # 1) Parametrização por ano
@@ -593,7 +575,7 @@ from scipy.stats import norm
 def modelo_assintotico(x, L, a, b, x0):
     return L - a * np.exp(-b * (x - x0))
 
-# piecewise linear
+# piecewise linear #chatgpt
 def modelo_piecewise(x, x0, k1, b1, k2, b2):
     return np.piecewise(
         x,
@@ -605,16 +587,16 @@ def modelo_piecewise(x, x0, k1, b1, k2, b2):
 def modelo_logaritmico(x, a, b, x0):
     return a + b * np.log(x - x0 + 1)
 
-# piecewise logarítmico (x0 fixo = min(x))
-def modelo_piecewise_log(x, x_c, a1, b1, a2, b2, x0):
-    return np.piecewise(
-        x,
-        [x < x_c, x >= x_c],
-        [
-            lambda t: a1 + b1 * np.log(t - x0 + 1),
-            lambda t: a2 + b2 * np.log(t - x_c + 1)
-        ]
-    )
+# # piecewise logarítmico (x0 fixo = min(x)) Função pelo chatgpt
+# def modelo_piecewise_log(x, x_c, a1, b1, a2, b2, x0):
+#     return np.piecewise(
+#         x,
+#         [x < x_c, x >= x_c],
+#         [
+#             lambda t: a1 + b1 * np.log(t - x0 + 1),
+#             lambda t: a2 + b2 * np.log(t - x_c + 1)
+#         ]
+#     )
 
 # --- Função principal ---
 def projetar_futuro(df, anos_futuros=None, confiança=0.95,
@@ -738,19 +720,7 @@ def projetar_futuro(df, anos_futuros=None, confiança=0.95,
                     "Parametros": (params[0], params[1], x0)
                 })
 
-            elif tipo_modelo == "piece_log":
-                x0 = x.min()
-                p0 = [x.mean(), y.min(), 1, y.min(), 1]
-                params, cov = curve_fit(
-                    lambda t, x_c, a1, b1, a2, b2: modelo_piecewise_log(t, x_c, a1, b1, a2, b2, x0),
-                    x, y, p0=p0, maxfev=20000
-                )
-                df_residuo['yhat'] = modelo_piecewise_log(x, *params, x0)
-                result.append({
-                    "Residuo": residuo,
-                    "Modelo": "Piecewise Logarítmico",
-                    "Parametros": (*params, x0)
-                })
+            
 
             # erro percentual
             df_residuo['Erro %'] = abs(y - df_residuo['yhat']) / y * 100
@@ -845,18 +815,7 @@ def projetar_futuro(df, anos_futuros=None, confiança=0.95,
                         "Residuo": residuo
                     })
 
-            elif tipo_modelo == "piece_log":
-                y_proj = modelo_piecewise_log(x_proj, *params, x0)
-                resid = y - df_residuo['yhat']
-                sigma = resid.std()
-                z = norm.ppf(1 - (1 - confiança) / 2)
-                df_proj = pd.DataFrame({
-                    "Ano": x_proj.astype(int),
-                    "yhat": y_proj,
-                    "IC_inf": y_proj - z * sigma,
-                    "IC_sup": y_proj + z * sigma,
-                    "Residuo": residuo
-                })
+            
 
             projecoes.append(df_proj)
 
