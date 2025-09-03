@@ -713,11 +713,24 @@ def projetar_futuro(df, anos_futuros=None, confiança=0.95,
                     lambda t, a, b: modelo_logaritmico(t, a, b, x0),
                     x, y, p0=p0, maxfev=20000
                 )
+                a,b = params
                 df_residuo['yhat'] = modelo_logaritmico(x, *params, x0)
+
+                estimativa_inical = a
+                taxa_inicial = b
+                t_min = 1
+                t_max = (x.max() - x0 + 1)
+                taxa_atual = b / t_max
+                taxa_media = b * (np.log(t_max) - np.log(t_min)) / (t_max - t_min)
+
                 result.append({
                     "Residuo": residuo,
                     "Modelo": "Logarítmico",
-                    "Parametros": (params[0], params[1], x0)
+                    "Parametros": (params[0], params[1], x0),
+                    "Estimativa_inicial (kg)": estimativa_inical,
+                    "Taxa_inicial (kg/ano)": taxa_inicial,
+                    "Taxa_atual (kg/ano)": taxa_atual,
+                    "Taxa_media (kg/ano)": taxa_media
                 })
 
             
